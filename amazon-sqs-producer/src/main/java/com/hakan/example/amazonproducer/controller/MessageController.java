@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequestMapping("/test")
 public class MessageController {
 
-    @Value("${amazon.sqs.url}")
+    @Value("${amazon.sqs.queue.url}")
     private String amazonSQSQueueUrl;
 
     @Qualifier("sqs")

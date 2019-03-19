@@ -4,6 +4,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
@@ -15,14 +16,16 @@ public class AmazonSQSCreateQueueRunner implements ApplicationRunner {
     @Autowired
     private AmazonSQS amazonSQSClient;
 
+    @Value("${amazon.sqs.queue.name}")
+    private String queueName;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        //http://localhost:9324/queue/process-queue
-
-        CreateQueueRequest createStandardQueueRequest = new CreateQueueRequest("process-queue");
+        //ex: http://localhost:9324/queue/process-queue
+        CreateQueueRequest createStandardQueueRequest = new CreateQueueRequest(queueName);
         String standardQueueUrl = amazonSQSClient.createQueue(createStandardQueueRequest).getQueueUrl();
 
-        log.info("create quee worked for -> " + standardQueueUrl);
+        log.info("create queue worked for -> " + standardQueueUrl);
     }
 }

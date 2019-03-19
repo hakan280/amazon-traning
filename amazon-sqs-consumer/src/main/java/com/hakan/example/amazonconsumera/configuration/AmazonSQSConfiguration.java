@@ -6,16 +6,24 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AmazonSQSConfiguration {
 
-    String endpoint = "http://localhost:9324";
-    String region = "elasticmq";
-    String accessKey = "x";
-    String secretKey = "x";
+    @Value("${amazon.sqs.base.url}")
+    private String endpoint;
+
+    @Value("${amazon.region}")
+    private String region;
+
+    @Value("${amazon.access.key}")
+    private String accessKey;
+
+    @Value("${amazon.secret.key}")
+    private String secretKey;
 
 
     @Bean

@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 public class AmazonSQSClientHandler {
 
-    @Value("${amazon.sqs.url}")
+    @Value("${amazon.sqs.queue.url}")
     private String amazonSQSQueueUrl;
 
     @Autowired
