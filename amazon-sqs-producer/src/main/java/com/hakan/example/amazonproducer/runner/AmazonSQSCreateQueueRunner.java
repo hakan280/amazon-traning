@@ -22,10 +22,11 @@ public class AmazonSQSCreateQueueRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        //ex: http://localhost:9324/queue/process-queue
+      /*  //ex: http://localhost:9324/queue/process-queue
+        //commented , quee will be created by elasticmq.conf
         CreateQueueRequest createStandardQueueRequest = new CreateQueueRequest(queueName);
         String standardQueueUrl = amazonSQSClient.createQueue(createStandardQueueRequest).getQueueUrl();
 
-        log.info("create queue worked for -> " + standardQueueUrl);
+        log.info("create queue worked for -> " + standardQueueUrl);*/
     }
 }
