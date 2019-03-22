@@ -1,7 +1,9 @@
 package com.hakan.example.amazonconsumera.handler;
 
+import com.amazonaws.services.sns.model.PublishResult;
 import com.amazonaws.services.sqs.model.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hakan.example.amazonconsumera.client.AmazonSNSClientHandler;
 import com.hakan.example.amazonconsumera.client.AmazonSQSClientHandler;
 import com.hakan.example.amazonconsumera.enums.ProcessStatus;
 import com.hakan.example.amazonconsumera.model.ProcessMessage;
@@ -11,6 +13,7 @@ import com.hakan.example.amazonconsumera.process.ProcessRunner;
 import com.hakan.example.amazonconsumera.repository.ProcessRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.aws.messaging.core.NotificationMessagingTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -36,6 +39,9 @@ public class ProcessHandler {
     @Autowired
     private AmazonSQSClientHandler sqsClientHandler;
 
+    @Autowired
+    private AmazonSNSClientHandler snsClientHandler;
+
 
     public void cleanCompletedProcess() {
         processHolder.clearCompletedProcess();
@@ -47,7 +53,8 @@ public class ProcessHandler {
         saveProcessMessageAndAddProcessHolder(message)
                 .thenCompose(this::deleteMessageFromSQSQueue)
                 .thenCompose(this::runProccessMessage)
-                .thenAccept(this::updateProcessStatus)
+                .thenCompose(this::updateProcessStatus)
+                .thenAccept(this::sendSNSNotification)
                 .handle((res, ex) -> {
                     if (ex != null) {
                         log.error(ex.getMessage(), ex);
@@ -114,15 +121,27 @@ public class ProcessHandler {
             maxAttempts = 2,
             backoff = @Backoff(delay = 5000)
     )
-    private void updateProcessStatus(ProcessWrapper processWrapper) {
-        CompletableFuture.runAsync(() -> {
+    private CompletableFuture<ProcessWrapper> updateProcessStatus(ProcessWrapper processWrapper) {
+        return CompletableFuture.supplyAsync(() -> {
             log.info("updateProcessStatus start");
             ProcessMessage processMessage = processWrapper.getProcessMessage();
             processMessage.setProcessStatus(ProcessStatus.COMPLETED);
             processRepository.save(processWrapper.getProcessMessage());
             log.info("updateProcessStatus finish");
-
+            return processWrapper;
         });
+    }
+
+
+    private void sendSNSNotification(ProcessWrapper processWrapper) {
+
+        CompletableFuture.runAsync(() -> {
+            log.info("sendSNSNotification start");
+            PublishResult publishResult = snsClientHandler.publishMessage(processWrapper.getProcessMessage().getMessage());
+            log.warn("publish-result -> " + publishResult.toString());
+            log.info("sendSNSNotification finish");
+        });
+
     }
 
     public boolean isProcessHolderFull() {

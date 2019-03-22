@@ -1,0 +1,29 @@
+
+
+#SQS
+docker run --name alpine-sqs -p 9324:9324 -p 9325:9325 -v `pwd`/alpine-sqs-conf:/opt/custom -d roribio16/alpine-sqs:latest
+
+
+#SNS - https://github.com/s12v/sns
+docker run -d -p 9911:9911 s12v/sns
+
+docker exec <CONTAINER_ID> sh -c 'aws sns --endpoint-url http://localhost:9911 create-topic --name test1'
+
+arn:aws:sns:us-east-1:123456789012:process-topic
+
+
+
+aws sns subscribe --topic-arn arn:aws:sns:us-west-2:0123456789012:my-topic --protocol email --notification-endpoint my-email@example.com
+01f883b42264
+docker exec <CONTAINER_ID> sh -c 'aws sns --endpoint-url=http://localhost:9911 subscribe --topic-arn arn:aws:sns:us-east-1:123456789012:process-topic --protocol http --notification-endpoint http://localhost:7000/process-topic'
+docker exec 01f883b42264 sh -c 'aws sns --endpoint-url=http://localhost:9911 subscribe --topic-arn arn:aws:sns:us-east-1:123456789012:process-topic --protocol http --notification-endpoint localhost:7000/process-topic'
+
+
+#list subs
+docker exec 01f883b42264 sh -c 'aws sns list-subscriptions'
+
+
+# test publish message
+docker exec 01f883b42264 sh -c 'aws sns --endpoint-url http://localhost:9911 publish --topic-arn arn:aws:sns:us-east-1:123456789012:process-topic --message "test"'
+
+

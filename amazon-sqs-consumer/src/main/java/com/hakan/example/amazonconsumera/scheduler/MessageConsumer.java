@@ -1,6 +1,7 @@
 package com.hakan.example.amazonconsumera.scheduler;
 
 
+import com.hakan.example.amazonconsumera.client.AmazonSNSClientHandler;
 import com.hakan.example.amazonconsumera.service.ProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,9 @@ public class MessageConsumer {
 
     @Autowired
     private ProcessService processService;
+
+    @Autowired
+    private AmazonSNSClientHandler amazonSNSClientHandler;
 
     @Scheduled(fixedDelay = 2000)
     public void consumeSQSMessages() {
