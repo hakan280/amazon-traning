@@ -1,29 +1,27 @@
 
+## To test aws from local we will use localstack
+https://github.com/localstack/localstack
 
-#SQS
-docker run --name alpine-sqs -p 9324:9324 -p 9325:9325 -v `pwd`/alpine-sqs-conf:/opt/custom -d roribio16/alpine-sqs:latest
+##To limit running service, change docker-compose.yaml
+environment:
+      - SERVICES= sns,sqs
 
-
-#SNS - https://github.com/s12v/sns
-docker run -d -p 9911:9911 s12v/sns
-
-docker exec <CONTAINER_ID> sh -c 'aws sns --endpoint-url http://localhost:9911 create-topic --name test1'
-
-arn:aws:sns:us-east-1:123456789012:process-topic
+TMPDIR=/private$TMPDIR docker-compose up
 
 
-
-aws sns subscribe --topic-arn arn:aws:sns:us-west-2:0123456789012:my-topic --protocol email --notification-endpoint my-email@example.com
-01f883b42264
-docker exec <CONTAINER_ID> sh -c 'aws sns --endpoint-url=http://localhost:9911 subscribe --topic-arn arn:aws:sns:us-east-1:123456789012:process-topic --protocol http --notification-endpoint http://localhost:7000/process-topic'
-docker exec 01f883b42264 sh -c 'aws sns --endpoint-url=http://localhost:9911 subscribe --topic-arn arn:aws:sns:us-east-1:123456789012:process-topic --protocol http --notification-endpoint localhost:7000/process-topic'
+# don't forget create SQS queue with name process-queue (for now queue is not created at startup)
 
 
-#list subs
-docker exec 01f883b42264 sh -c 'aws sns list-subscriptions'
 
+!!important , use ip address for --notification-endpoint , because it is running docker container...
 
-# test publish message
-docker exec 01f883b42264 sh -c 'aws sns --endpoint-url http://localhost:9911 publish --topic-arn arn:aws:sns:us-east-1:123456789012:process-topic --message "test"'
+#create sns topic, subscribe and publish message,
+aws --endpoint-url=http://localhost:4575 sns create-topic --name process-topic
+aws sns --endpoint-url=http://localhost:4575 subscribe --topic-arn arn:aws:sns:eu-west-2:123456789012:process-topic --protocol http --notification-endpoint http://192.168.1.13:7000/process-topic
+aws sns --endpoint-url http://localhost:4575 publish --topic-arn arn:aws:sns:eu-west-2:123456789012:process-topic --message "test"
+aws --endpoint-url=http://localhost:4575 sns list-topics
 
+#TODO
+Change this README.md
 
+Custom conf can be written in sqs_starter.py file, (needed rebuild docker image)

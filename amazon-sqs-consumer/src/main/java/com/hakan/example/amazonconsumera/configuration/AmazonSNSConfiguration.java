@@ -27,6 +27,9 @@ public class AmazonSNSConfiguration {
     @Value("${amazon.secret.key}")
     private String secretKey;
 
+    @Value("${amazon.sns.local.endpoint}")
+    private String snsLocalEndpoint;
+
 
     @Profile("local")
     @Bean
@@ -34,7 +37,7 @@ public class AmazonSNSConfiguration {
         AmazonSNS amazonSNS = AmazonSNSClientBuilder
                 .standard()
                 .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("localhost:9911", region))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(snsLocalEndpoint, region))
                 .withClientConfiguration(new ClientConfiguration().withProtocol(Protocol.HTTP))
                 .build();
 
